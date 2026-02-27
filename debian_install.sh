@@ -168,23 +168,49 @@ install_uv() {
 
 setup_python_env() {
   echo ">>> Setting up Python virtual environment with UV..."
-  # Install UV globally first
-  install_uv
 
   su - "$DISPATCH_USER" <<EOSU
 cd "$APP_DIR"
 export PATH="\$HOME/.local/bin:\$PATH"
-# Install UV for the dispatch user if not already available
-if ! command -v uv &> /dev/null; then
-  curl -LsSf https://astral.sh/uv/install.sh | sh
-  export PATH="\$HOME/.local/bin:\$PATH"
-fi
-# Create venv and install dependencies using UV
-uv venv env --python $PYTHON_BIN
-uv sync --python env/bin/python --no-install-project --no-dev
+
+command -v uv >/dev/null 2>&1 || curl -LsSf https://astral.sh/uv/install.sh | sh
+
+rm -rf env
+$PYTHON_BIN -m venv env
+env/bin/python -m ensurepip --upgrade
+
+export UV_PROJECT_ENVIRONMENT="$APP_DIR/env"
+uv sync --no-dev
+
+env/bin/python -m pip show gunicorn >/dev/null 2>&1 || env/bin/python -m pip install gunicorn
 EOSU
+
   ln -sf /usr/bin/ffmpeg "$APP_DIR/env/bin/ffmpeg"
 }
+
+
+##############################################################################
+# 6.1) Ensure Environment File
+##############################################################################
+
+ensure_env_file() {
+  echo ">>> Ensuring DJANGO_SECRET_KEY exists in ${APP_DIR}/.env..."
+  su - "$DISPATCH_USER" <<EOSU
+set -euo pipefail
+cd "$APP_DIR"
+touch .env
+chmod 600 .env
+if ! grep -q '^DJANGO_SECRET_KEY=' .env; then
+  key=\$(env/bin/python - <<'PY'
+import secrets
+print(secrets.token_urlsafe(64))
+PY
+)
+  echo "DJANGO_SECRET_KEY=\$key" >> .env
+fi
+EOSU
+}
+
 
 ##############################################################################
 # 7) Build Frontend
@@ -231,16 +257,20 @@ create_directories() {
 django_migrate_collectstatic() {
   echo ">>> Running Django migrations & collectstatic..."
   su - "$DISPATCH_USER" <<EOSU
+set -euo pipefail
 cd "$APP_DIR"
-source env/bin/activate
+set -a
+source .env
+set +a
 export POSTGRES_DB="$POSTGRES_DB"
 export POSTGRES_USER="$POSTGRES_USER"
 export POSTGRES_PASSWORD="$POSTGRES_PASSWORD"
 export POSTGRES_HOST="localhost"
-python manage.py migrate --noinput
-python manage.py collectstatic --noinput
+env/bin/python manage.py migrate --noinput
+env/bin/python manage.py collectstatic --noinput
 EOSU
 }
+
 
 ##############################################################################
 # 10) Configure Services & Nginx
@@ -266,6 +296,7 @@ Environment="POSTGRES_DB=${POSTGRES_DB}"
 Environment="POSTGRES_USER=${POSTGRES_USER}"
 Environment="POSTGRES_PASSWORD=${POSTGRES_PASSWORD}"
 Environment="POSTGRES_HOST=localhost"
+EnvironmentFile=/opt/dispatcharr/.env
 ExecStartPre=/usr/bin/bash -c 'until pg_isready -h localhost -U ${POSTGRES_USER}; do sleep 1; done'
 ExecStart=${APP_DIR}/env/bin/gunicorn \\
     --workers=4 \\
@@ -298,6 +329,7 @@ Environment="POSTGRES_DB=${POSTGRES_DB}"
 Environment="POSTGRES_USER=${POSTGRES_USER}"
 Environment="POSTGRES_PASSWORD=${POSTGRES_PASSWORD}"
 Environment="POSTGRES_HOST=localhost"
+EnvironmentFile=/opt/dispatcharr/.env
 Environment="CELERY_BROKER_URL=redis://localhost:6379/0"
 ExecStart=${APP_DIR}/env/bin/celery -A dispatcharr worker -l info
 Restart=always
@@ -325,6 +357,7 @@ Environment="POSTGRES_DB=${POSTGRES_DB}"
 Environment="POSTGRES_USER=${POSTGRES_USER}"
 Environment="POSTGRES_PASSWORD=${POSTGRES_PASSWORD}"
 Environment="POSTGRES_HOST=localhost"
+EnvironmentFile=/opt/dispatcharr/.env
 Environment="CELERY_BROKER_URL=redis://localhost:6379/0"
 ExecStart=${APP_DIR}/env/bin/celery -A dispatcharr beat -l info
 Restart=always
@@ -352,6 +385,7 @@ Environment="POSTGRES_DB=${POSTGRES_DB}"
 Environment="POSTGRES_USER=${POSTGRES_USER}"
 Environment="POSTGRES_PASSWORD=${POSTGRES_PASSWORD}"
 Environment="POSTGRES_HOST=localhost"
+EnvironmentFile=/opt/dispatcharr/.env
 ExecStart=${APP_DIR}/env/bin/daphne -b 0.0.0.0 -p ${WEBSOCKET_PORT} dispatcharr.asgi:application
 Restart=always
 KillMode=mixed
@@ -448,6 +482,7 @@ main() {
   setup_python_env
   build_frontend
   create_directories
+  ensure_env_file
   django_migrate_collectstatic
   configure_services
   start_services
