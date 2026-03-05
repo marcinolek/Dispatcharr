@@ -42,6 +42,8 @@ const useChannelsTableStore = create((set, get) => ({
   },
 
   setPagination: (pagination) => {
+    console.log('Updating pagination: store', pagination);
+
     set((state) => ({
       pagination,
     }));

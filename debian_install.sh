@@ -235,7 +235,7 @@ build_frontend() {
 cd "$APP_DIR/frontend"
 npm install --legacy-peer-deps
 # Use 'dev' to keep assets unminified and include sourcemaps
-npm run dev 
+npm run build 
 EOSU
 }
 

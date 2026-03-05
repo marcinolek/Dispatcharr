@@ -34,6 +34,7 @@ const useStreamsTableStore = create((set) => ({
   },
 
   setPagination: (pagination) => {
+    console.log('Updating pagination: streams', pagination);
     set(() => ({
       pagination,
     }));
