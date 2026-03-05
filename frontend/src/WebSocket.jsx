@@ -274,7 +274,7 @@ export const WebsocketProvider = ({ children }) => {
                     updateData.updated_at = new Date().toISOString();
                     // Log successful completion for debugging
                     console.log(
-                      'M3U refresh completed successfully:',
+                      'M3U xdxd refresh completed successfully:',
                       updateData
                     );
                     fetchPlaylists(); // Refresh playlists to ensure UI is up-to-date

@@ -229,16 +229,26 @@ EOSU
 # EOSU
 # }
 
+# build_frontend() {
+#   echo ">>> Building frontend..."
+#   su - "$DISPATCH_USER" <<EOSU
+# cd "$APP_DIR/frontend"
+# npm install --legacy-peer-deps
+# # Use 'dev' to keep assets unminified and include sourcemaps
+# npm run build 
+# EOSU
+# }
+
 build_frontend() {
   echo ">>> Building frontend..."
   su - "$DISPATCH_USER" <<EOSU
 cd "$APP_DIR/frontend"
 npm install --legacy-peer-deps
-# Use 'dev' to keep assets unminified and include sourcemaps
-npm run build 
+# Force development mode during the build process
+export NODE_ENV=development
+npm run build
 EOSU
 }
-
 
 
 ##############################################################################
