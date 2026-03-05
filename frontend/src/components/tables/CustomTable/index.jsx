@@ -18,7 +18,7 @@ const useTable = ({
   expandedRowRenderer = () => <></>,
   onRowSelectionChange = null,
   getExpandedRowHeight = null,
-  state = [],
+  state = {},
   columnSizing,
   setColumnSizing,
   onColumnVisibilityChange,
