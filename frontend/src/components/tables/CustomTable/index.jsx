@@ -103,6 +103,11 @@ const useTable = ({
       selectedTableIds,
       ...(columnSizing && { columnSizing }),
     },
+    // Add these lines to prevent infinite loops during data updates
+    autoResetPageIndex: false,
+    autoResetExpanded: false,
+    autoResetRowSelection: false,
+
     onStateChange: options.onStateChange,
     ...(setColumnSizing && { onColumnSizingChange: setColumnSizing }),
     ...(onColumnVisibilityChange && { onColumnVisibilityChange }),
