@@ -113,7 +113,7 @@ setup_postgresql() {
   db_exists=$(sudo -u postgres psql -tAc "SELECT 1 FROM pg_database WHERE datname='$POSTGRES_DB'")
   if [[ "$db_exists" != "1" ]]; then
     echo ">>> Creating database '${POSTGRES_DB}' with UTF8 encoding..."
-    sudo -u postgres createdb -E UTF8 -T template0 "$POSTGRES_DB"
+    sudo -u postgres createdb -E UTF8 "$POSTGRES_DB"
   else
     echo ">>> Database '${POSTGRES_DB}' already exists, skipping creation."
   fi
