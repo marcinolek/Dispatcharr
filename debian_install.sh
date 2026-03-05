@@ -12,8 +12,19 @@ fi
 trap 'echo -e "\n[ERROR] Line $LINENO failed. Exiting." >&2; exit 1' ERR
 
 ##############################################################################
-# 0) Warning / Disclaimer
+# 0) Locales & Warning / Disclaimer
 ##############################################################################
+
+setup_locales() {
+  echo ">>> Setting up locales..."
+  apt-get update
+  apt-get install -y locales
+  sed -i '/en_US.UTF-8 UTF-8/s/^# //g' /etc/locale.gen
+  locale-gen
+  update-locale LANG=en_US.UTF-8
+  export LANG=en_US.UTF-8
+  export LC_ALL=en_US.UTF-8
+}
 
 show_disclaimer() {
   echo "**************************************************************"
@@ -67,11 +78,6 @@ configure_variables() {
 install_packages() {
   echo ">>> Installing system packages..."
   apt-get update
-  apt-get install -y locales
-  sed -i '/en_US.UTF-8 UTF-8/s/^# //g' /etc/locale.gen
-  locale-gen
-  export LANG=en_US.UTF-8
-  export LC_ALL=en_US.UTF-8
 
   declare -a packages=(
     git curl wget build-essential gcc libpq-dev
@@ -480,6 +486,7 @@ EOF
 ##############################################################################
 
 main() {
+  setup_locales
   show_disclaimer
   configure_variables
   install_packages
