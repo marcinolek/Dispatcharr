@@ -633,11 +633,13 @@ const StreamsTable = ({ onReady }) => {
       }
 
       try {
+        console.log('Fetching streams with params:', params.toString());
         const [result, ids, filterOptions] = await Promise.all([
           API.queryStreamsTable(params),
           API.getAllStreamIds(params),
           API.getStreamFilterOptions(params),
         ]);
+        console.log('Fetch result:', { count: result?.count, streams: result?.results?.length, ids: ids?.length });
 
         fetchInProgressRef.current = false;
 

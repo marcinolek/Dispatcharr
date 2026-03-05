@@ -1043,9 +1043,10 @@ def process_m3u_batch_direct(account_id, batch, groups, hash_keys):
 
             # Filter out disabled groups for this account
             if group_title not in groups:
-                logger.debug(
-                    f"Skipping stream in disabled or excluded group: {group_title}"
-                )
+                if len(groups) < 10:
+                    logger.info(f"Skipping stream '{name}' - group '{group_title}' not in enabled groups: {list(groups.keys())}")
+                else:
+                    logger.debug(f"Skipping stream '{name}' - group '{group_title}' not in enabled groups ({len(groups)} enabled)")
                 continue
 
             # Determine provider-specific fields first
