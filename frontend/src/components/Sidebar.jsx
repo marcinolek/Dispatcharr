@@ -174,7 +174,7 @@ const Sidebar = ({ collapsed, toggleDrawer, drawerWidth, miniDrawerWidth }) => {
             icon: <Video size={20} />,
           },
           {
-            label: 'M3U & EPG Manager 🚀',
+            label: 'M3U & EPG Manager',
             icon: <Play size={20} />,
             path: '/sources',
           },
