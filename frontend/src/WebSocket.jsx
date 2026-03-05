@@ -241,7 +241,8 @@ export const WebsocketProvider = ({ children }) => {
 
             case 'm3u_refresh':
               // Update the store with progress information
-              setRefreshProgress(parsedEvent.data);
+              console.log('REF PROGRESS', parsedEvent.data);
+              // setRefreshProgress(parsedEvent.data);
 
               // Update the playlist status whenever we receive a status update
               // Not just when progress is 100% or status is pending_setup
