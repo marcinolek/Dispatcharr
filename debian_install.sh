@@ -106,8 +106,8 @@ setup_postgresql() {
 
   db_exists=$(sudo -u postgres psql -tAc "SELECT 1 FROM pg_database WHERE datname='$POSTGRES_DB'")
   if [[ "$db_exists" != "1" ]]; then
-    echo ">>> Creating database '${POSTGRES_DB}'..."
-    sudo -u postgres createdb "$POSTGRES_DB"
+    echo ">>> Creating database '${POSTGRES_DB}' with UTF8 encoding..."
+    sudo -u postgres createdb -E UTF8 "$POSTGRES_DB"
   else
     echo ">>> Database '${POSTGRES_DB}' already exists, skipping creation."
   fi
@@ -326,7 +326,7 @@ User=${DISPATCH_USER}
 Group=${DISPATCH_GROUP}
 WorkingDirectory=${APP_DIR}
 EnvironmentFile=/opt/dispatcharr/.env
-Environment="PATH=${APP_DIR}/env/bin"
+Environment="PATH=${APP_DIR}/env/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin"
 Environment="POSTGRES_DB=${POSTGRES_DB}"
 Environment="POSTGRES_USER=${POSTGRES_USER}"
 Environment="POSTGRES_PASSWORD=${POSTGRES_PASSWORD}"
@@ -354,7 +354,7 @@ User=${DISPATCH_USER}
 Group=${DISPATCH_GROUP}
 WorkingDirectory=${APP_DIR}
 EnvironmentFile=/opt/dispatcharr/.env
-Environment="PATH=${APP_DIR}/env/bin"
+Environment="PATH=${APP_DIR}/env/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin"
 Environment="POSTGRES_DB=${POSTGRES_DB}"
 Environment="POSTGRES_USER=${POSTGRES_USER}"
 Environment="POSTGRES_PASSWORD=${POSTGRES_PASSWORD}"
@@ -382,7 +382,7 @@ User=${DISPATCH_USER}
 Group=${DISPATCH_GROUP}
 WorkingDirectory=${APP_DIR}
 EnvironmentFile=/opt/dispatcharr/.env
-Environment="PATH=${APP_DIR}/env/bin"
+Environment="PATH=${APP_DIR}/env/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin"
 Environment="POSTGRES_DB=${POSTGRES_DB}"
 Environment="POSTGRES_USER=${POSTGRES_USER}"
 Environment="POSTGRES_PASSWORD=${POSTGRES_PASSWORD}"
