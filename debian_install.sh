@@ -67,6 +67,12 @@ configure_variables() {
 install_packages() {
   echo ">>> Installing system packages..."
   apt-get update
+  apt-get install -y locales
+  sed -i '/en_US.UTF-8 UTF-8/s/^# //g' /etc/locale.gen
+  locale-gen
+  export LANG=en_US.UTF-8
+  export LC_ALL=en_US.UTF-8
+
   declare -a packages=(
     git curl wget build-essential gcc libpq-dev
     python3-dev python3-venv python3-pip nginx redis-server
