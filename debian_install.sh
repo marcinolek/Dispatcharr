@@ -32,11 +32,11 @@ show_disclaimer() {
   echo "**************************************************************"
   echo ""
   echo "If you wish to proceed, type \"I understand\" and press Enter."
-  read user_input
-  if [ "$user_input" != "I understand" ]; then
-    echo "Exiting script..."
-    exit 1
-  fi
+  # read user_input
+  # if [ "$user_input" != "I understand" ]; then
+  #   echo "Exiting script..."
+  #   exit 1
+  # fi
 }
 
 ##############################################################################
