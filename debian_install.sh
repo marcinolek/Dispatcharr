@@ -209,6 +209,9 @@ PY
 )
   echo "DJANGO_SECRET_KEY=\$key" >> .env
 fi
+if ! grep -q '^DEBUG=' .env; then
+  echo "DEBUG=True" >> .env
+fi
 EOSU
 }
 
@@ -217,14 +220,26 @@ EOSU
 # 7) Build Frontend
 ##############################################################################
 
+# build_frontend() {
+#   echo ">>> Building frontend..."
+#   su - "$DISPATCH_USER" <<EOSU
+# cd "$APP_DIR/frontend"
+# npm install --legacy-peer-deps
+# npm run build
+# EOSU
+# }
+
 build_frontend() {
   echo ">>> Building frontend..."
   su - "$DISPATCH_USER" <<EOSU
 cd "$APP_DIR/frontend"
 npm install --legacy-peer-deps
-npm run build
+# Use 'dev' to keep assets unminified and include sourcemaps
+npm run dev 
 EOSU
 }
+
+
 
 ##############################################################################
 # 8) Create Directories
@@ -299,11 +314,18 @@ Environment="POSTGRES_USER=${POSTGRES_USER}"
 Environment="POSTGRES_PASSWORD=${POSTGRES_PASSWORD}"
 Environment="POSTGRES_HOST=localhost"
 ExecStartPre=/usr/bin/bash -c 'until pg_isready -h localhost -U ${POSTGRES_USER}; do sleep 1; done'
-ExecStart=${APP_DIR}/env/bin/gunicorn \\
-    --workers=4 \\
-    --worker-class=gevent \\
-    --timeout=300 \\
-    --bind unix:${GUNICORN_SOCKET} \\
+# ExecStart=${APP_DIR}/env/bin/gunicorn \\
+#     --workers=4 \\
+#     --worker-class=gevent \\
+#     --timeout=300 \\
+#     --bind unix:${GUNICORN_SOCKET} \\
+#     dispatcharr.wsgi:application
+ExecStart=${APP_DIR}/env/bin/gunicorn \
+    --workers=1 \
+    --reload \
+    --worker-class=gevent \
+    --timeout=300 \
+    --bind unix:${GUNICORN_SOCKET} \
     dispatcharr.wsgi:application
 Restart=always
 KillMode=mixed
